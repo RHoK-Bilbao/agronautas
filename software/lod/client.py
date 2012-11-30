@@ -55,15 +55,38 @@ elif createDataset:
         sock.sendall("INSERT@43.29564@-2.99729@supercocina@3100000000@4@verduras\n")
     finally:
         sock.close()
-        
-        """
-         
+    try:
+        # Connect to server and send data
+        sock.connect((HOST, PORT))
         sock.sendall("INSERT@43.29564@-2.99729@micrococina@5100000000@4@verduras\n")
+    finally:
+        sock.close()
+    try:
+        # Connect to server and send data
+        sock.connect((HOST, PORT))
         sock.sendall("UPDATE@supercocina@134@23.0@70.3@3100000000")
+    finally:
+        sock.close()
+    try:
+        # Connect to server and send data
+        sock.connect((HOST, PORT))
         sock.sendall("UPDATE@supercocina@14@13.0@72.3@2100000010")
+    finally:
+        sock.close()
+    try:
+        # Connect to server and send data
+        sock.connect((HOST, PORT))
         sock.sendall("UPDATE@micrococina@134@23.0@70.3@5100300000")
+    finally:
+        sock.close()
+    try:
+        # Connect to server and send data
+        sock.connect((HOST, PORT))
         sock.sendall("UPDATE@micrococina@114@24.0@60.3@5100500000")
-    """
+    finally:
+        sock.close()
+        
+ 
 
 # Create a socket (SOCK_STREAM means a TCP socket)
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
