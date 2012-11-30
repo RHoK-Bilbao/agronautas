@@ -86,35 +86,6 @@ xml:base="http://www.morelab.deusto.es/agronautasSimple.owl">
                         
 </rdf:RDF>
 """
-
-"""
-def convertToRDF(data):
-    
-        # get the data
-        command, latitude, longitude, name, luminosity, tempExternal, tempInternal = re.split("@", data)
-        
-        nearplace = getNearerPlace(latitude,longitude)
-                
-        # complete the RDF        
-        rdfStrCooker = rdfTemplateCooker % {
-            "LOCATION_ID_HOLDER" : "location" + name,
-            "LATITUDE_HOLDER" : latitude,
-            "LONGITUDE_HOLDER" : longitude,
-            "NEAR_TO_HOLDER" : nearplace, 
-            "COOKER_ID_HOLDER" : "cooker" + name,
-            "NAME_HOLDER" : name,
-            "LUMINOSITY_HOLDER" : luminosity,
-            "TEMP_EXTERNAL_HOLDER" : tempExternal,
-            "TEMP_INTERNAL_HOLDER" : tempInternal   
-        }
-                               
-        if verbose:
-            print "************RESULT**************"
-            print rdfStrCooker
-            print "************END**************"
-            
-        return rdfStrCooker  
-"""        
         
 def getNearerPlace(lat, lng):
        
@@ -127,34 +98,27 @@ def getNearerPlace(lat, lng):
     return itemlist[len(itemlist)-1].childNodes[0].data
     
 def insertCooker(data):
-    print 'insertCooker'
-    command, latitude, longitude, name = re.split("@", data)
-    
+    command, latitude, longitude, name, timestamp, persons, menu = re.split("@", data)
     nearplace = getNearerPlace(latitude,longitude)
                 
-    # complete the RDF        
-    rdfStrCooker = rdfTemplateCookerInsert % {
-        "LOCATION_ID_HOLDER" : "location" + name,
-        "LATITUDE_HOLDER" : latitude,
-        "LONGITUDE_HOLDER" : longitude,
-        "NEAR_TO_HOLDER" : nearplace, 
-        "COOKER_ID_HOLDER" : "cooker" + name,
-        "NAME_HOLDER" : name
-    }
-                           
-    if verbose:
-        print "************RESULT**************"
-        print rdfStrCooker
-        print "************END**************"
-        
     insertTemplate = '''PREFIX dc: <http://purl.org/dc/elements/1.1/>
     PREFIX : <http://www.morelab.deusto.es/agronautasSimple.owl#>
 
     INSERT DATA INTO <http://agronautas>
-    { <%(NAME_HOLDER)s> :name      "%(NAME_HOLDER)s"^^<http://www.w3.org/2001/XMLSchema#string> ;
-                        :latitude  "%(LATITUDE_HOLDER)s"^^<http://www.w3.org/2001/XMLSchema#float> ;
-                        :longitude "%(LONGITUDE_HOLDER)s"^^<http://www.w3.org/2001/XMLSchema#float> ;
-                        :nearTo    <http://www.geonames.org/%(NEAR_TO_HOLDER)s/about.rdf> .
+    { <%(COOKER_ID_HOLDER)s>            a                   :SolarCooker ;
+                                                            :name           "%(NAME_HOLDER)s"^^<http://www.w3.org/2001/XMLSchema#string> ;
+                                                            :hasLocation    <%(COOKER_ID_HOLDER)s/location/%(TIMESTAMP_HOLDER)s> ;
+                                                            :cookedMenus    <%(COOKER_ID_HOLDER)s/cookedmenu/%(TIMESTAMP_HOLDER)s> .
+      <%(COOKER_ID_HOLDER)s/cookedmenu/%(TIMESTAMP_HOLDER)s> a   :Cooker ;
+                                                            :menu "%(MENU_HOLDER)s" ;
+                                                            :persons "%(PERSON_HOLDER)s" ;
+                                                            :timestamp "%(TIMESTAMP_HOLDER)s" .
+                                        
+      <%(COOKER_ID_HOLDER)s/location/%(TIMESTAMP_HOLDER)s>   a               :Location;
+                                                            :latitude           "%(LATITUDE_HOLDER)s"^^<http://www.w3.org/2001/XMLSchema#float> ;
+                                                            :longitude          "%(LONGITUDE_HOLDER)s"^^<http://www.w3.org/2001/XMLSchema#float> ;
+                                                            :nearTo             <http://www.geonames.org/%(NEAR_TO_HOLDER)s/about.rdf> ;
+                                                            :timestamp          "%(TIMESTAMP_HOLDER)s"^^<http://www.w3.org/2001/XMLSchema#string> .
     }
     
     '''
@@ -165,7 +129,10 @@ def insertCooker(data):
         "LONGITUDE_HOLDER" : longitude,
         "NEAR_TO_HOLDER" : nearplace, 
         "COOKER_ID_HOLDER" : "cooker" + name,
-        "NAME_HOLDER" : name
+        "NAME_HOLDER" : name,
+        "TIMESTAMP_HOLDER": timestamp,
+        "PERSON_HOLDER": persons,
+        "MENU_HOLDER": menu
     }
     
     if verbose:
@@ -178,8 +145,37 @@ def insertCooker(data):
     return rdfStrCooker  
     
 def updateData(data):
-    return 'bla'
+    
+    command, name, luminosity, external_temp, internal_temp, timestamp = re.split("@", data)
+    
+    insertTemplate = '''PREFIX dc: <http://purl.org/dc/elements/1.1/>
+    PREFIX : <http://www.morelab.deusto.es/agronautasSimple.owl#>
 
+    INSERT DATA INTO <http://agronautas>
+    { <%(COOKER_ID_HOLDER)s/%(TIMESTAMP_HOLDER)s/measure>    a :Measure
+                                                            :externalTemperature   "%(TEMP_EXTERNAL_HOLDER)s"^^<http://www.w3.org/2001/XMLSchema#float> ;
+                                                            :internalTemperature   "%(TEMP_INTERNAL_HOLDER)s"^^<http://www.w3.org/2001/XMLSchema#float> ;
+                                                            :luminosity            "%(LUMINOSITY_HOLDER)s"^^<http://www.w3.org/2001/XMLSchema#float> ;
+                                                            :timestamp             "%(TIMESTAMP_HOLDER)s"^^<http://www.w3.org/2001/XMLSchema#string> .
+      <%(COOKER_ID_HOLDER)s>                                :hasMeasure            <%(COOKER_ID_HOLDER)s/%(TIMESTAMP_HOLDER)s/measure> .
+    }
+    
+    '''
+    
+    rdfStrCooker = insertTemplate % {
+        "COOKER_ID_HOLDER" : "cooker" + name,
+        "TIMESTAMP_HOLDER": timestamp,
+        "TEMP_EXTERNAL_HOLDER": external_temp,
+        "TEMP_INTERNAL_HOLDER": internal_temp,
+        "LUMINOSITY_HOLDER": luminosity
+    }
+    
+    print rdfStrCooker
+    
+    params = urllib.urlencode({'query': rdfStrCooker})
+    opener = urllib.urlopen('http://helheim.deusto.es:8890/sparql?%s', params)
+    
+    return rdfStrCooker
 
 class MyTCPHandler(SocketServer.BaseRequestHandler): 
     
@@ -204,6 +200,9 @@ class MyTCPHandler(SocketServer.BaseRequestHandler):
 
 
 if __name__ == "__main__":
-    server = SocketServer.ThreadingTCPServer((HOST, PORT), MyTCPHandler)
+    class ReuseServer(SocketServer.ThreadingTCPServer):
+        allow_reuse_address = True
+        
+    server = ReuseServer((HOST, PORT), MyTCPHandler)
 
     server.serve_forever()

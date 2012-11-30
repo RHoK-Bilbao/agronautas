@@ -42,6 +42,10 @@
     <rdfs:range rdf:resource="http://www.geonames.org/ontology#Feature"/>
     <rdfs:domain rdf:resource="#Location"/>
   </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:ID="hasLocation">
+    <rdfs:domain rdf:resource="#Device"/>
+    <rdfs:range rdf:resource="#Location"/>
+  </owl:ObjectProperty>
   <owl:ObjectProperty rdf:ID="cookedMenus">
     <rdfs:range rdf:resource="#Cooked"/>
     <rdfs:domain rdf:resource="#SolarCooker"/>
@@ -51,11 +55,6 @@
   <rdf:Property rdf:about="http://purl.org/dc/terms/identifier"/>
   <rdf:Property rdf:about="http://www.w3.org/2004/02/skos/core#altLabel"/>
   <rdf:Property rdf:about="http://www.w3.org/2003/01/geo/wgs84_pos#lat"/>
-  <owl:FunctionalProperty rdf:ID="Menu">
-    <rdfs:domain rdf:resource="#Cooked"/>
-    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
-    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
-  </owl:FunctionalProperty>
   <owl:FunctionalProperty rdf:ID="longitude">
     <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
     <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#float"/>
@@ -66,13 +65,21 @@
     <rdfs:domain rdf:resource="#Measure"/>
     <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
   </owl:FunctionalProperty>
-  <owl:FunctionalProperty rdf:ID="Persons">
+  <owl:FunctionalProperty rdf:ID="menu">
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
     <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
     <rdfs:domain rdf:resource="#Cooked"/>
-    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#int"/>
   </owl:FunctionalProperty>
   <owl:FunctionalProperty rdf:ID="timestamp">
-    <rdfs:domain rdf:resource="#Measure"/>
+    <rdfs:domain>
+      <owl:Class>
+        <owl:unionOf rdf:parseType="Collection">
+          <owl:Class rdf:about="#Measure"/>
+          <owl:Class rdf:about="#Cooked"/>
+          <owl:Class rdf:about="#Location"/>
+        </owl:unionOf>
+      </owl:Class>
+    </rdfs:domain>
     <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
     <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
   </owl:FunctionalProperty>
@@ -96,10 +103,10 @@
     <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
     <rdfs:domain rdf:resource="#Measure"/>
   </owl:FunctionalProperty>
-  <owl:FunctionalProperty rdf:ID="hasLocation">
-    <rdfs:domain rdf:resource="#Device"/>
-    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
-    <rdfs:range rdf:resource="#Location"/>
+  <owl:FunctionalProperty rdf:ID="persons">
+    <rdfs:domain rdf:resource="#Cooked"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#int"/>
   </owl:FunctionalProperty>
   <j.0:Person rdf:about="http://data.semanticweb.org/person/bernard-vatant"/>
 </rdf:RDF>
