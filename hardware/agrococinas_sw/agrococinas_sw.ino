@@ -1,5 +1,8 @@
 #include <EEPROM.h>
 #include <SdFat.h>
+#include <LiquidCrystal.h>
+
+
 SdFat sd;
 SdFile myFile;
 //declare variables
@@ -9,6 +12,25 @@ float humedC;
 float luminC;
 float tempOutC;
 char* luminL;
+
+// initialize the library with the numbers of the interface pins
+LiquidCrystal lcd(9, 8, 5, 4, 3, 2);
+
+
+//Botones
+const int bDataPin = 0;
+const int bStartPin = 6;
+const int bFinishPin = 1;
+
+int bDataState = 1;
+int bStartState = 1;
+int bFinishState = 1;
+
+long int timestampBegin = 0;
+long int timestampIntermediate = 0;
+long int timestampFinish = 0;
+
+int stage = 0; //0:sin orientar; 1:orientado y calentandose; 2:cocinando; 
 
 int tempInPin = A0;
 int humedPin = A1;
@@ -31,11 +53,22 @@ char StringFinal[40];
 
 void setup()
 {
-  Serial.begin(9600); //opens serial port, sets data rate to 9600 bps
+  Serial.begin(115200); //opens serial port, sets data rate to 9600 bps
    pinMode(led, OUTPUT);   
   // write a 0 to all 512 bytes of the EEPROM
   for (int i = 0; i < 512; i++)
     EEPROM.write(i, 0);
+  pinMode(bStartPin, INPUT); 
+  pinMode(bFinishPin, INPUT);
+  pinMode(bDataPin, INPUT);
+  
+  // set up the LCD's number of columns and rows: 
+  lcd.begin(20, 4);
+  // Print a message to the LCD.
+  lcd.setCursor(0, 0);
+  lcd.print("Orientame al sol y");
+  lcd.setCursor(0, 2);
+  lcd.print("despues pulsa verde.");
     
 }
 
@@ -111,8 +144,8 @@ void evaluate_lumi()
   
 }
 
-char* generateUpdate(){
-  char* arroba="@";
+void generateUpdate(){
+  char arroba[2]="@";
   char aux[10];
   memcpy(StringFinal,"UPDATE@",7); 
   strcat(StringFinal, nombre_cocina);
@@ -128,8 +161,37 @@ char* generateUpdate(){
   strcat(StringFinal, arroba);
   sprintf(aux,"%d",int(humedC));
   strcat(StringFinal, aux);
-  delay(100);
-  return StringFinal;
+  delay(10);
+  Serial.println(StringFinal);
+  //return StringFinal;
+}
+
+void showData(float iT, float eT, float h, float l){
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("Temp. Int:");
+  lcd.setCursor(13, 0);
+  lcd.print(iT,1);
+  lcd.setCursor(19, 0);
+  lcd.print("C");
+  lcd.setCursor(0, 1);
+  lcd.print("Temp. Ext:");
+  lcd.setCursor(13, 1);
+  lcd.print(eT,1);
+  lcd.setCursor(19, 1);
+  lcd.print("C");
+  lcd.setCursor(0, 2);
+  lcd.print("Humedad:");
+  lcd.setCursor(13, 2);
+  lcd.print(h,1);
+  lcd.setCursor(19, 2);
+  lcd.print(char(37));
+  lcd.setCursor(0, 3);
+  lcd.print("Luminosidad:");
+  lcd.setCursor(13, 3);
+  lcd.print(l,0);
+  lcd.setCursor(18, 3);
+  lcd.print("LX");
 }
 void loop()
 {
@@ -168,6 +230,8 @@ void loop()
   Serial.println();
   generateUpdate();
   writeSD();
+  memset(StringFinal,0,sizeof(StringFinal));
+
 
   /*
 Serial.print((byte)humed1C ); 
@@ -198,6 +262,60 @@ Serial.print((byte)humed1C );
   addr = addr + 4;
   if (addr == 512)
     addr = 0;
+    
+    
+  bStartState = digitalRead(bStartPin);
+  bFinishState = digitalRead(bFinishPin);  
+  bDataState = digitalRead(bDataPin);
+  
+  if (bStartState == LOW){
+    Serial.println("pulsado verde");
+    if (stage == 0){
+      delay(300);
+      lcd.clear();
+      lcd.setCursor(0,0);
+      lcd.print("La cocina se esta");
+      lcd.setCursor(0,2);
+      lcd.print("calentando");
+      delay(3000);
+      lcd.clear();
+      stage = 1;
+      //timestampBegin = 
+    }
+    else if (stage == 1){
+      delay(300);
+      lcd.clear();
+      lcd.setCursor(0,0);
+      lcd.print("Cocinando");
+      delay(3000);
+      lcd.clear();
+      stage = 2;
+      //timestapIntermediate =
+    }
+  }
+  
+  if ((bFinishState == LOW)&&(stage == 2)){
+    delay(300);
+    lcd.clear();
+    lcd.setCursor(0,0);
+    lcd.print("Comida lista");
+    lcd.setCursor(0,2);
+    lcd.print("Que aproveche");
+    delay(3000);
+    lcd.clear();
+    stage = 0;
+    //timestampFinish =
+  }
+    
+  // check if the pushbutton is pressed.
+  // if it is, the buttonState is HIGH:
+  if (bDataState == LOW) {
+    delay(300);    
+    showData(tempInC, tempOutC, humedC, luminC);
+    delay(5000);
+    lcd.clear();
+  }
+  
 }
 
 
