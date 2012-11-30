@@ -45,7 +45,7 @@ if (!sd.begin(chipSelect, SPI_HALF_SPEED)) sd.initErrorHalt();
     sd.errorHalt("opening test.txt for write failed");
   }
 
-
+  myFile.println();
   myFile.print("Temperatura Externa: ");
   myFile.print(tempOutC,0); 
   myFile.println();
