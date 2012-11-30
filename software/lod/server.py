@@ -12,6 +12,7 @@ import StringIO
 from xml.dom import minidom
 from rdflib.graph import Graph
 
+
 """
 Expected msg format: "lat@long@name@luminosity@externalTemp@internalTemp"
 """
@@ -152,7 +153,7 @@ def updateData(data):
     PREFIX : <http://www.morelab.deusto.es/agronautasSimple.owl#>
 
     INSERT DATA INTO <http://agronautas>
-    { <%(COOKER_ID_HOLDER)s/%(TIMESTAMP_HOLDER)s/measure>    a :Measure
+    { <%(COOKER_ID_HOLDER)s/%(TIMESTAMP_HOLDER)s/measure>   a :Measure
                                                             :externalTemperature   "%(TEMP_EXTERNAL_HOLDER)s"^^<http://www.w3.org/2001/XMLSchema#float> ;
                                                             :internalTemperature   "%(TEMP_INTERNAL_HOLDER)s"^^<http://www.w3.org/2001/XMLSchema#float> ;
                                                             :luminosity            "%(LUMINOSITY_HOLDER)s"^^<http://www.w3.org/2001/XMLSchema#float> ;
