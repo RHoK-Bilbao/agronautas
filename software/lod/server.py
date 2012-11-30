@@ -8,6 +8,7 @@ Created on Thu Nov 22 10:27:16 2012
 import SocketServer
 import re
 import urllib
+import StringIO
 from xml.dom import minidom
 from rdflib.graph import Graph
 
@@ -22,7 +23,7 @@ PORT = 9999
 
 # RDF template    
 # TODO meter cooker id como URL                                       
-rdfTemplateCookerInsert = """
+rdfTemplateCookerUpdate = """
 <?xml version="1.0"?>
                     
 <rdf:RDF
@@ -56,8 +57,7 @@ xml:base="http://www.morelab.deusto.es/agronautasSimple.owl">
 </rdf:RDF>
 """
 
-rdfTemplateCookerUpdate = """
-<?xml version="1.0"?>
+rdfTemplateCookerInsert = """<?xml version="1.0"?>
                     
 <rdf:RDF
 xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
@@ -127,6 +127,7 @@ def getNearerPlace(lat, lng):
     return itemlist[len(itemlist)-1].childNodes[0].data
     
 def insertCooker(data):
+    print 'insertCooker'
     command, latitude, longitude, name = re.split("@", data)
     
     nearplace = getNearerPlace(latitude,longitude)
@@ -146,10 +147,33 @@ def insertCooker(data):
         print rdfStrCooker
         print "************END**************"
         
-    g = Graph()
-    g.parse(rdfStrCooker)
+    insertTemplate = '''PREFIX dc: <http://purl.org/dc/elements/1.1/>
+    PREFIX : <http://www.morelab.deusto.es/agronautasSimple.owl#>
+
+    INSERT DATA INTO <http://agronautas>
+    { <%(NAME_HOLDER)s> :name      "%(NAME_HOLDER)s"^^<http://www.w3.org/2001/XMLSchema#string> ;
+                        :latitude  "%(LATITUDE_HOLDER)s"^^<http://www.w3.org/2001/XMLSchema#float> ;
+                        :longitude "%(LONGITUDE_HOLDER)s"^^<http://www.w3.org/2001/XMLSchema#float> ;
+                        :nearTo    <http://www.geonames.org/%(NEAR_TO_HOLDER)s/about.rdf> .
+    }
     
-    print len(g)
+    '''
+    
+    rdfStrCooker = insertTemplate % {
+        "LOCATION_ID_HOLDER" : "location" + name,
+        "LATITUDE_HOLDER" : latitude,
+        "LONGITUDE_HOLDER" : longitude,
+        "NEAR_TO_HOLDER" : nearplace, 
+        "COOKER_ID_HOLDER" : "cooker" + name,
+        "NAME_HOLDER" : name
+    }
+    
+    if verbose:
+        print rdfStrCooker
+
+    params = urllib.urlencode({'query': rdfStrCooker})
+    opener = urllib.urlopen('http://helheim.deusto.es:8890/sparql?%s', params)
+    print opener.read()
     
     return rdfStrCooker  
     
@@ -162,9 +186,9 @@ class MyTCPHandler(SocketServer.BaseRequestHandler):
      def handle(self):
         self.data = self.request.recv(1024).strip()
         
-        if self.data.startswith == 'INSERT':
+        if self.data.startswith('INSERT'):
             insertCooker(self.data)        
-        elif self.data.startswith == 'UPDATE':
+        elif self.data.startswith('UPDATE'):
             updateData(self.data)
         
         if verbose:

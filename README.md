@@ -1,1 +1,1 @@
-Proyecto RHoK Bilbao de agrococinas (Propuesto por PEZestudio)
+RHoK-Bilbao project for ecologic solar cookers (Problem proposed by @pezestudio) 
