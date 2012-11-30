@@ -22,7 +22,7 @@ if insert:
     data = dataInsert
 elif update:
     data = dataUpdate
-elif insert
+elif insert:
     data = dataRegister        
 
 # Create a socket (SOCK_STREAM means a TCP socket)

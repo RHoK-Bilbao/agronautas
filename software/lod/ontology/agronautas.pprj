@@ -1,4 +1,4 @@
-; Fri Nov 30 15:04:02 CET 2012
+; Fri Nov 30 15:27:19 CET 2012
 ; 
 ;+ (version "3.4.4")
 ;+ (build "Build 579")
@@ -258,29 +258,24 @@
 ([agronautas_ProjectKB_Class60] of  Property_List
 )
 
-([agronautas_ProjectKB_Class61] of  String
+([agronautas_ProjectKB_Class66] of  String
 
 	(name ":INSTANCE-ANNOTATION")
 	(string_value "%3AANNOTATION-TEXT"))
 
-([agronautas_ProjectKB_Class62] of  String
+([agronautas_ProjectKB_Class67] of  String
 
 	(name "http://www.w3.org/2002/07/owl#Class")
 	(string_value "%3ANAME"))
 
-([agronautas_ProjectKB_Class63] of  String
+([agronautas_ProjectKB_Class68] of  String
 
 	(name ":PAL-CONSTRAINT")
 	(string_value "%3APAL-NAME"))
 
-([agronautas_ProjectKB_Class64] of  String
+([agronautas_ProjectKB_Class69] of  String
 
 	(name ":META-CLASS")
-	(string_value "%3ANAME"))
-
-([agronautas_ProjectKB_Class65] of  String
-
-	(name "http://www.w3.org/2002/07/owl#Thing")
 	(string_value "%3ANAME"))
 
 ([agronautas_ProjectKB_Class7] of  Widget
@@ -288,6 +283,11 @@
 	(is_hidden TRUE)
 	(property_list [agronautas_ProjectKB_Class8])
 	(widget_class_name "edu.stanford.smi.protegex.server_changes.prompt.UsersTab"))
+
+([agronautas_ProjectKB_Class70] of  String
+
+	(name "http://www.w3.org/2002/07/owl#Thing")
+	(string_value "%3ANAME"))
 
 ([agronautas_ProjectKB_Class8] of  Property_List
 )
@@ -301,11 +301,11 @@
 ([BROWSER_SLOT_NAMES] of  Property_List
 
 	(properties
-		[agronautas_ProjectKB_Class61]
-		[agronautas_ProjectKB_Class62]
-		[agronautas_ProjectKB_Class63]
-		[agronautas_ProjectKB_Class64]
-		[agronautas_ProjectKB_Class65]))
+		[agronautas_ProjectKB_Class66]
+		[agronautas_ProjectKB_Class67]
+		[agronautas_ProjectKB_Class68]
+		[agronautas_ProjectKB_Class69]
+		[agronautas_ProjectKB_Class70]))
 
 ([CLSES_TAB] of  Widget
 
