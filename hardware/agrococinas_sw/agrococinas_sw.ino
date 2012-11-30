@@ -25,6 +25,8 @@ int addr3 = 0;
 float supplyVolt = 5.0;
 int temp_warning = 22;
 char* msg = "";
+char* nombre_cocina = "SuperCocina";
+char StringFinal[40];
 
 
 void setup()
@@ -108,6 +110,27 @@ void evaluate_lumi()
   }
   
 }
+
+char* generateUpdate(){
+  char* arroba="@";
+  char aux[10];
+  memcpy(StringFinal,"UPDATE@",7); 
+  strcat(StringFinal, nombre_cocina);
+  strcat(StringFinal, arroba);
+  sprintf(aux,"%d",int(luminC));
+  strcat(StringFinal, aux);
+  strcat(StringFinal, arroba);
+  sprintf(aux,"%d",int(tempOutC));
+  strcat(StringFinal, aux);
+  strcat(StringFinal, arroba);
+  sprintf(aux,"%d",int(tempInC));
+  strcat(StringFinal, aux);
+  strcat(StringFinal, arroba);
+  sprintf(aux,"%d",int(humedC));
+  strcat(StringFinal, aux);
+  delay(100);
+  return StringFinal;
+}
 void loop()
 {
   tempInC = analogRead(tempInPin);           //read the value from the sensor
@@ -143,9 +166,9 @@ void loop()
   Serial.print("Temperatura Interna: ");
   Serial.print(tempInC,0);  
   Serial.println();
+  generateUpdate();
   writeSD();
-  msg = "INSERT@43.27123@-2.93855@ProtoCocina@";
-  Serial.println(msg);
+
   /*
 Serial.print((byte)humed1C ); 
    Serial.print(",");
