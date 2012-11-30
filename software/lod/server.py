@@ -8,85 +8,12 @@ Created on Thu Nov 22 10:27:16 2012
 import SocketServer
 import re
 import urllib
-import StringIO
 from xml.dom import minidom
-from rdflib.graph import Graph
-
-
-"""
-Expected msg format: "lat@long@name@luminosity@externalTemp@internalTemp"
-"""
 
 verbose = True
 
 HOST = "localhost"
 PORT = 9999
-
-# RDF template    
-# TODO meter cooker id como URL                                       
-rdfTemplateCookerUpdate = """
-<?xml version="1.0"?>
-                    
-<rdf:RDF
-xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-xmlns:protege="http://protege.stanford.edu/plugins/owl/protege#"
-xmlns:xsp="http://www.owl-ontologies.com/2005/08/07/xsp.owl#"
-xmlns:j.0="http://xmlns.com/foaf/0.1/"
-xmlns:owl="http://www.w3.org/2002/07/owl#"
-xmlns:j.1="http://geovocab.org/spatial#"
-xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
-xmlns:swrl="http://www.w3.org/2003/11/swrl#"
-xmlns:swrlb="http://www.w3.org/2003/11/swrlb#"
-xmlns="http://www.morelab.deusto.es/agronautasSimple.owl#"
-xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
-xml:base="http://www.morelab.deusto.es/agronautasSimple.owl">
-
-<SolarCooker rdf:ID="%(COOKER_ID_HOLDER)s">
-    <name rdf:datatype="http://www.w3.org/2001/XMLSchema#string">%(NAME_HOLDER)s</name>
-    <hasLocation>
-        <Location rdf:ID="%(LOCATION_ID_HOLDER)s">
-            <latitude rdf:datatype="http://www.w3.org/2001/XMLSchema#float">%(LATITUDE_HOLDER)s</latitude>
-            <longitude rdf:datatype="http://www.w3.org/2001/XMLSchema#float">%(LONGITUDE_HOLDER)s</longitude>
-            <nearTo rdf:resource="http://www.geonames.org/%(NEAR_TO_HOLDER)s/about.rdf"/>
-        </Location>
-    </hasLocation>
-    <luminosity rdf:datatype="http://www.w3.org/2001/XMLSchema#float">%(LUMINOSITY_HOLDER)s</luminosity>
-    <externalTemperature rdf:datatype="http://www.w3.org/2001/XMLSchema#float">%(TEMP_EXTERNAL_HOLDER)s</externalTemperature>
-    <internalTemperature rdf:datatype="http://www.w3.org/2001/XMLSchema#float">%(TEMP_INTERNAL_HOLDER)s</internalTemperature>
-</SolarCooker>
-                        
-</rdf:RDF>
-"""
-
-rdfTemplateCookerInsert = """<?xml version="1.0"?>
-                    
-<rdf:RDF
-xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-xmlns:protege="http://protege.stanford.edu/plugins/owl/protege#"
-xmlns:xsp="http://www.owl-ontologies.com/2005/08/07/xsp.owl#"
-xmlns:j.0="http://xmlns.com/foaf/0.1/"
-xmlns:owl="http://www.w3.org/2002/07/owl#"
-xmlns:j.1="http://geovocab.org/spatial#"
-xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
-xmlns:swrl="http://www.w3.org/2003/11/swrl#"
-xmlns:swrlb="http://www.w3.org/2003/11/swrlb#"
-xmlns="http://www.morelab.deusto.es/agronautasSimple.owl#"
-xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
-xml:base="http://www.morelab.deusto.es/agronautasSimple.owl">
-
-<SolarCooker rdf:ID="%(COOKER_ID_HOLDER)s">
-    <name rdf:datatype="http://www.w3.org/2001/XMLSchema#string">%(NAME_HOLDER)s</name>
-    <hasLocation>
-        <Location rdf:ID="%(LOCATION_ID_HOLDER)s">
-            <latitude rdf:datatype="http://www.w3.org/2001/XMLSchema#float">%(LATITUDE_HOLDER)s</latitude>
-            <longitude rdf:datatype="http://www.w3.org/2001/XMLSchema#float">%(LONGITUDE_HOLDER)s</longitude>
-            <nearTo rdf:resource="http://www.geonames.org/%(NEAR_TO_HOLDER)s/about.rdf"/>
-        </Location>
-    </hasLocation>
-</SolarCooker>
-                        
-</rdf:RDF>
-"""
         
 def getNearerPlace(lat, lng):
        
