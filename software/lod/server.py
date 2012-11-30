@@ -7,6 +7,8 @@ Created on Thu Nov 22 10:27:16 2012
 
 import SocketServer
 import re
+import urllib
+from xml.dom import minidom
 
 """
 Expected msg format: "lat@long@name@luminosity@externalTemp@internalTemp"
@@ -56,6 +58,8 @@ def convertToRDF(data):
     
         # get the data
         latitude, longitude, name, luminosity, tempExternal, tempInternal = re.split("@", data)
+        
+        getNearerPlace(latitude,longitude)
                 
         # complete the RDF        
         rdfStrCooker = rdfTemplateCooker % {
@@ -76,6 +80,19 @@ def convertToRDF(data):
             print "************END**************"
             
         return rdfStrCooker  
+        
+        
+def getNearerPlace(lat, lng):
+       
+    params = urllib.urlencode({'lat': lat, 'lng' : lng, 'username': 'rhokbilbao'})
+    response = urllib.urlopen('http://api.geonames.org/extendedFindNearby?%s' % params)
+    
+    xmldoc = minidom.parseString(response.read())
+    itemlist = xmldoc.getElementsByTagName('geonameId')
+
+    return itemlist[len(itemlist)-1].childNodes[0].data
+    
+
 
 class MyTCPHandler(SocketServer.BaseRequestHandler): 
     
