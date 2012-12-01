@@ -1,1 +1,6 @@
-En este directorio se almacenarán el código relacionado con el hardware.
+This directory contains all the Arduino related files
+	- agrococinas_sw contains the code for arduino
+	- circuits contains all the PCB designs
+	- models contains all the designs for the 3D printers
+	
+TODO: upload the models and PCB designs
