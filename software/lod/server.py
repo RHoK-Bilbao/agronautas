@@ -74,7 +74,7 @@ def insertCooker(data):
     
 def updateData(data):
     
-    command, name, luminosity, external_temp, internal_temp, timestamp = re.split("@", data)
+    command, name, luminosity, external_temp, internal_temp, timestamp, status = re.split("@", data)
     
     insertTemplate = '''PREFIX dc: <http://purl.org/dc/elements/1.1/>
     PREFIX : <http://www.morelab.deusto.es/agronautasSimple.owl#>
@@ -84,7 +84,8 @@ def updateData(data):
                                                             :externalTemperature   "%(TEMP_EXTERNAL_HOLDER)s"^^<http://www.w3.org/2001/XMLSchema#float> ;
                                                             :internalTemperature   "%(TEMP_INTERNAL_HOLDER)s"^^<http://www.w3.org/2001/XMLSchema#float> ;
                                                             :luminosity            "%(LUMINOSITY_HOLDER)s"^^<http://www.w3.org/2001/XMLSchema#float> ;
-                                                            :timestamp             "%(TIMESTAMP_HOLDER)s"^^<http://www.w3.org/2001/XMLSchema#string> .
+                                                            :timestamp             "%(TIMESTAMP_HOLDER)s"^^<http://www.w3.org/2001/XMLSchema#string> ;
+                                                            :status                "%(STATUS_HOLDERS)s"^^<http://www.w3.org/2001/XMLSchema#string> .
       <%(COOKER_ID_HOLDER)s>                                :hasMeasure            <%(COOKER_ID_HOLDER)s/%(TIMESTAMP_HOLDER)s/measure> .
     }
     
@@ -95,7 +96,8 @@ def updateData(data):
         "TIMESTAMP_HOLDER": timestamp,
         "TEMP_EXTERNAL_HOLDER": external_temp,
         "TEMP_INTERNAL_HOLDER": internal_temp,
-        "LUMINOSITY_HOLDER": luminosity
+        "LUMINOSITY_HOLDER": luminosity,
+        "STATUS_HOLDER": status
     }
     
     print rdfStrCooker
