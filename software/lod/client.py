@@ -2,21 +2,24 @@
 """
 Created on Thu Nov 22 10:33:44 2012
 
-@author: Aitor
+@author: Mikel Emaldi, Aitor Almeida
 """
 
 import socket
 
-insert = False
+insert = True
 update = False
-createDataset = True
+createDataset = False
 
-HOST, PORT = "localhost", 9999
+HOST, PORT = "192.168.1.94", 9999
 
 dataInsert = "INSERT@43.29564@-2.99729@supercocina@2012-11-30@4@arroz"
-dataUpdate = "UPDATE@supercocina@134@23.0@70.3@2012-11-30"
+dataUpdate = "UPDATE@supercocina@134@23.0@70.3@2012-11-30@cooking"
 
 if insert:
+    
+    print "Insert"    
+    
     # Create a socket (SOCK_STREAM means a TCP socket)
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     
@@ -40,6 +43,7 @@ elif update:
     finally:
         sock.close()
 elif createDataset:
+    #quick and dirty testing of the dataset creation
     data = "meh"
 
     try:
