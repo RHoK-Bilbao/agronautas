@@ -1,0 +1,115 @@
+@font-face { font-family: Antic; src: url('../fonts/Antic-Regular.ttf'); } 
+
+ html, body, #basicMap {
+	width: 100%;
+	height: 100%;
+	margin: 0;
+	font-family: Verdana;
+}
+#boxes{
+	position: absolute;
+	top:0px;
+	right: 0px;
+	height: 100%;
+	z-index: 10000; 
+	background-color: rgba(0,0,0,0.9);
+}
+
+#main_box, #info_box{
+	/*position: absolute;
+	top:0px;
+	right: 0px;*/
+	height: 100%;
+	float:left;
+	/*z-index: 10000;
+	background-color: rgba(0,0,0,0.9);*/
+}
+
+#box-header, #info-box-header{
+	float:left;
+	width: 20px;
+	padding-left: 5px;
+	padding-right: 5px;
+	height: 100%;
+	/*background-image: linear-gradient(top, rgb(56,63,173) 0%, rgb(7,19,41) 100%);
+	background-image: -o-linear-gradient(top, rgb(56,63,173) 0%, rgb(7,19,41) 100%);
+	background-image: -moz-linear-gradient(top, rgb(56,63,173) 0%, rgb(7,19,41) 100%);
+	background-image: -webkit-linear-gradient(top, rgb(56,63,173) 0%, rgb(7,19,41) 100%);
+	background-image: -ms-linear-gradient(top, rgb(56,63,173) 0%, rgb(7,19,41) 100%);
+
+	background-image: -webkit-gradient(
+		linear,
+		left top,
+		left bottom,
+		color-stop(0, rgb(56,63,173)),
+		color-stop(1, rgb(7,19,41))
+	);*/
+    background-color: #ff3300;
+}
+
+#info-box-header{
+ background-color: #ee2200;
+}
+
+#list-scrollable{
+	padding-left: 20px;
+	overflow:auto;
+}
+
+#box_content, #info_box_content{
+	padding-left: 10px;
+	width:800px;
+}
+ 
+.heading {
+	color: #ff3300;
+	padding: 5px 20px;
+	cursor: pointer;
+	font-size: 22px;
+	border-bottom: 1px solid #ff3300;
+}
+.content {
+	color:#ffffff;
+	font-size: 14px;
+	display:inline-block;
+}
+
+.summary{
+	width: 700px;
+}
+
+div.summary img{
+	margin-right: 10px;
+	margin-bottom: 10px;
+	float:left;
+	width: 200px;
+	border:2px solid #ff3300;
+}
+
+td.field{
+	width:200px;
+	color: #ff3300;
+}
+
+td.info_box{
+	text-align: center;
+	width: 100px;
+	height: 100px;
+	color: #ffffff;
+	font-size: 24px;
+	background-color: #ff3300;
+}
+
+td.info_box small{
+	display:inline-block;
+	font-size: 12px;
+}
+
+#activity dl{
+	float:left;
+	margin:10px;
+	width: 330px;
+}
+#activity dt{
+	color: #ff3300;
+}

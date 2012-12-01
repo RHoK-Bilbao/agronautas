@@ -2,7 +2,7 @@
 """
 Created on Thu Nov 22 10:27:16 2012
 
-@author: Aitor
+@author: Mikel Emaldi, Aitor Almeida
 """
 
 import SocketServer
@@ -14,6 +14,17 @@ verbose = True
 
 HOST = "localhost"
 PORT = 9999
+
+"""
+The server accepts 2 type of commands:
+    - INSERT: is sent when the cooker starts eating, after the food to be cooked
+    abd the number of people is known.
+        - Format: INSERT@latitude@longitude@cookerName@timestampUnixTime@numPersons@food
+        - Example: INSERT@43.29564@-2.99729@megacooker@1234567890@4@rice
+    - UPDATE: the cooker sends periodic updates with sensor data. 2 posible states: cooking and stop
+        - Format: UPDATE@megacooker@luminosity@extenalTemp@internalTemp@timestapUnixTime@state
+        - Example: UPDATE@megacooker@134@23.0@70.3@2012-11-30@cooking
+"""
         
 def getNearerPlace(lat, lng):
        
@@ -74,7 +85,7 @@ def insertCooker(data):
     
 def updateData(data):
     
-    command, name, luminosity, external_temp, internal_temp, timestamp = re.split("@", data)
+    command, name, luminosity, external_temp, internal_temp, timestamp, status = re.split("@", data)
     
     insertTemplate = '''PREFIX dc: <http://purl.org/dc/elements/1.1/>
     PREFIX : <http://www.morelab.deusto.es/agronautasSimple.owl#>
@@ -84,7 +95,8 @@ def updateData(data):
                                                             :externalTemperature   "%(TEMP_EXTERNAL_HOLDER)s"^^<http://www.w3.org/2001/XMLSchema#float> ;
                                                             :internalTemperature   "%(TEMP_INTERNAL_HOLDER)s"^^<http://www.w3.org/2001/XMLSchema#float> ;
                                                             :luminosity            "%(LUMINOSITY_HOLDER)s"^^<http://www.w3.org/2001/XMLSchema#float> ;
-                                                            :timestamp             "%(TIMESTAMP_HOLDER)s"^^<http://www.w3.org/2001/XMLSchema#string> .
+                                                            :timestamp             "%(TIMESTAMP_HOLDER)s"^^<http://www.w3.org/2001/XMLSchema#string> ;
+                                                            :status                "%(STATUS_HOLDERS)s"^^<http://www.w3.org/2001/XMLSchema#string> .
       <%(COOKER_ID_HOLDER)s>                                :hasMeasure            <%(COOKER_ID_HOLDER)s/%(TIMESTAMP_HOLDER)s/measure> .
     }
     
@@ -95,7 +107,8 @@ def updateData(data):
         "TIMESTAMP_HOLDER": timestamp,
         "TEMP_EXTERNAL_HOLDER": external_temp,
         "TEMP_INTERNAL_HOLDER": internal_temp,
-        "LUMINOSITY_HOLDER": luminosity
+        "LUMINOSITY_HOLDER": luminosity,
+        "STATUS_HOLDER": status
     }
     
     print rdfStrCooker
@@ -109,6 +122,8 @@ class MyTCPHandler(SocketServer.BaseRequestHandler):
     
      def handle(self):
         self.data = self.request.recv(1024).strip()
+        
+        print "received" + self.data
         
         if self.data.startswith('INSERT'):
             insertCooker(self.data)        
@@ -128,6 +143,8 @@ class MyTCPHandler(SocketServer.BaseRequestHandler):
 
 
 if __name__ == "__main__":
+    
+    print "server running..."
     class ReuseServer(SocketServer.ThreadingTCPServer):
         allow_reuse_address = True
         
