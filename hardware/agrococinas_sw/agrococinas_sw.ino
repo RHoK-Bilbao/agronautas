@@ -1,49 +1,44 @@
+// Includes
 #include <EEPROM.h>
 #include <SdFat.h>
 #include <LiquidCrystal.h>
 
-
+// declare variables
 SdFat sd;
 SdFile myFile;
-//declare variables
 const int chipSelect = 10;
 float tempInC;
 float humedC;
 float luminC;
 float tempOutC;
 char* luminL;
-
+boolean advicedHighTemp = false;
 // initialize the library with the numbers of the interface pins
 LiquidCrystal lcd(9, 8, 5, 4, 3, 2);
-
-
 //Botones
 const int bDataPin = 0;
 const int bStartPin = 6;
 const int bFinishPin = 1;
-
 int bDataState = 1;
 int bStartState = 1;
 int bFinishState = 1;
-
 long int timestampBegin = 0;
 long int timestampIntermediate = 0;
 long int timestampFinish = 0;
-
 int stage = 0; //0:sin orientar; 1:orientado y calentandose; 2:cocinando; 
-
+//Sensors
 int tempInPin = A0;
 int humedPin = A1;
 int luminPin = A2;
 int tempOutPin = A3;
 int led = 7;
 int samples[8]; // 8 samples to have a large sample
-
+//EPROMM Write
 int addr = 0;
 int addr1 = 0;
 int addr2 = 0;
 int addr3 = 0;
-
+// Constants
 float supplyVolt = 5.0;
 int temp_warning = 22;
 char* msg = "";
@@ -53,33 +48,29 @@ char StringFinal[40];
 
 void setup()
 {
-  Serial.begin(115200); //opens serial port, sets data rate to 9600 bps
+  Serial.begin(115200); //opens serial port, sets data rate to 115200 bps
    pinMode(led, OUTPUT);   
   // write a 0 to all 512 bytes of the EEPROM
   for (int i = 0; i < 512; i++)
     EEPROM.write(i, 0);
   pinMode(bStartPin, INPUT); 
   pinMode(bFinishPin, INPUT);
-  pinMode(bDataPin, INPUT);
-  
+  pinMode(bDataPin, INPUT);  
   // set up the LCD's number of columns and rows: 
   lcd.begin(20, 4);
   // Print a message to the LCD.
   lcd.setCursor(0, 0);
   lcd.print("Orientame al sol y");
   lcd.setCursor(0, 2);
-  lcd.print("despues pulsa verde.");
-    
+  lcd.print("despues pulsa verde.");   
 }
 
 void writeSD(){
 if (!sd.begin(chipSelect, SPI_HALF_SPEED)) sd.initErrorHalt();
-
   // open the file for write at end like the Native SD library
   if (!myFile.open("log.txt", O_RDWR | O_CREAT | O_AT_END)) {
     sd.errorHalt("opening test.txt for write failed");
   }
-
   myFile.println();
   myFile.print("Temperatura Externa: ");
   myFile.print(tempOutC,0); 
@@ -95,11 +86,9 @@ if (!sd.begin(chipSelect, SPI_HALF_SPEED)) sd.initErrorHalt();
   myFile.print("Temperatura Interna: ");
   myFile.print(tempInC,0);  
   myFile.println();
-
   // close the file:
   myFile.close();
   Serial.println("done.");
-
 }
 
 void readSD(){
@@ -109,7 +98,6 @@ void readSD(){
     sd.errorHalt("opening test.txt for read failed");
   }
   Serial.println("log.txt:");
-
   // read from the file until there's nothing else in it:
   int data;
   while ((data = myFile.read()) > 0) Serial.write(data);
@@ -140,11 +128,11 @@ void evaluate_lumi()
     luminL = "luminoso";
   }else{
     luminL = "muy luminoso";
-  }
-  
+  } 
 }
 
-void generateUpdate(){
+void generateUpdate()
+{
   char arroba[2]="@";
   char aux[10];
   memcpy(StringFinal,"UPDATE@",7); 
@@ -193,8 +181,10 @@ void showData(float iT, float eT, float h, float l){
   lcd.setCursor(18, 3);
   lcd.print("LX");
 }
-void loop()
+
+void readSensors()
 {
+  ////////////////////Leemos los sensores////////////////////////////////////////
   tempInC = analogRead(tempInPin);           //read the value from the sensor
   tempInC = (supplyVolt * tempInC * 100.0)/1023.0;  //temp in
   tempInC = (tempInC-32)*5/9;
@@ -228,47 +218,61 @@ void loop()
   Serial.print("Temperatura Interna: ");
   Serial.print(tempInC,0);  
   Serial.println();
-  generateUpdate();
-  writeSD();
-  memset(StringFinal,0,sizeof(StringFinal));
+}
 
-
-  /*
-Serial.print((byte)humed1C ); 
-   Serial.print(",");
-   Serial.print((byte)humed2C ); 
-   Serial.print(",");
-   Serial.print((byte)luminC ); 
-   Serial.print(",");
-   Serial.print((byte)tempC ); 
-   Serial.println();
-   */
- // delay(59860);                           //wait 60 second before sending new data
-  delay(1360);                           //wait 60 second before sending new data
-  addr1 = addr + 1;
-  addr2 = addr + 2;
-  addr3 = addr + 3;
-  EEPROM.write(addr,(byte)tempOutC);
-  delay(20);
-  EEPROM.write(addr1, (byte)luminC);
-  delay(20);
-  EEPROM.write(addr2, (byte)humedC);
-  delay(20);
-  EEPROM.write(addr3, (byte)tempInC);
-  delay(20);
-
-  // advance to the next address.  there are 512 bytes in 
-  // the EEPROM, so go back to 0 when we hit 512.
-  addr = addr + 4;
-  if (addr == 512)
-    addr = 0;
-    
-    
+void readButtons()
+{
   bStartState = digitalRead(bStartPin);
   bFinishState = digitalRead(bFinishPin);  
   bDataState = digitalRead(bDataPin);
-  
-  if (bStartState == LOW){
+}
+
+void evaluateTemperature()
+{
+  if ((tempInC>60) && (!advicedHighTemp)){
+  lcd.clear();
+  lcd.setCursor(0,0);
+  lcd.print("Estoy a 60 grados.");
+  lcd.setCursor(0,1);
+  lcd.print("Cuando introduzcas");
+  lcd.setCursor(0,2);
+  lcd.print("la comida, pulsa el");
+  lcd.setCursor(0,3);
+  lcd.print("verde.");
+  advicedHighTemp=true;
+  }
+}
+
+void checkShowData()
+{
+   // check if the pushbutton is pressed.
+  // if it is, the buttonState is HIGH:
+  if (bDataState == LOW) {
+    delay(300);    
+    showData(tempInC, tempOutC, humedC, luminC);
+    delay(5000);
+    lcd.clear();
+  } 
+}
+
+void checkStageTwo()
+{
+    if ((bFinishState == LOW)&&(stage == 2)){
+    delay(300);
+    lcd.clear();
+    lcd.setCursor(0,0);
+    lcd.print("Comida lista");
+    lcd.setCursor(0,2);
+    lcd.print("Que aproveche");
+    delay(3000);
+    lcd.clear();
+    stage = 0;
+  }  
+}
+
+void checkStageOne()
+{
+    if (bStartState == LOW){
     Serial.println("pulsado verde");
     if (stage == 0){
       delay(300);
@@ -280,7 +284,6 @@ Serial.print((byte)humed1C );
       delay(3000);
       lcd.clear();
       stage = 1;
-      //timestampBegin = 
     }
     else if (stage == 1){
       delay(300);
@@ -290,31 +293,38 @@ Serial.print((byte)humed1C );
       delay(3000);
       lcd.clear();
       stage = 2;
-      //timestapIntermediate =
     }
   }
-  
-  if ((bFinishState == LOW)&&(stage == 2)){
-    delay(300);
-    lcd.clear();
-    lcd.setCursor(0,0);
-    lcd.print("Comida lista");
-    lcd.setCursor(0,2);
-    lcd.print("Que aproveche");
-    delay(3000);
-    lcd.clear();
-    stage = 0;
-    //timestampFinish =
-  }
-    
-  // check if the pushbutton is pressed.
-  // if it is, the buttonState is HIGH:
-  if (bDataState == LOW) {
-    delay(300);    
-    showData(tempInC, tempOutC, humedC, luminC);
-    delay(5000);
-    lcd.clear();
-  }
+}
+void loop()
+{
+  readSensors();
+  delay(3000);
+  generateUpdate();
+  writeSD();
+  memset(StringFinal,0,sizeof(StringFinal));
+  addr1 = addr + 1;
+  addr2 = addr + 2;
+  addr3 = addr + 3;
+  EEPROM.write(addr,(byte)tempOutC);
+  delay(20);
+  EEPROM.write(addr1, (byte)luminC);
+  delay(20);
+  EEPROM.write(addr2, (byte)humedC);
+  delay(20);
+  EEPROM.write(addr3, (byte)tempInC);
+  delay(20);
+  // advance to the next address.  there are 512 bytes in 
+  // the EEPROM, so go back to 0 when we hit 512.
+  addr = addr + 4;
+  if (addr == 512)
+    addr = 0;   
+
+  readButtons(); 
+  checkStageOne();
+  checkStageTwo(); 
+  checkShowData();
+  evaluateTemperature();
   
 }
 
