@@ -51,13 +51,13 @@ def insertCooker(data):
       <%(COOKER_ID_HOLDER)s/cookedmenu/%(TIMESTAMP_HOLDER)s> a   :Cooker ;
                                                             :menu "%(MENU_HOLDER)s" ;
                                                             :persons "%(PERSON_HOLDER)s" ;
-                                                            :timestamp "%(TIMESTAMP_HOLDER)s" .
+                                                            :timestamp %(TIMESTAMP_HOLDER)s .
                                         
       <%(COOKER_ID_HOLDER)s/location/%(TIMESTAMP_HOLDER)s>   a               :Location;
                                                             :latitude           "%(LATITUDE_HOLDER)s"^^<http://www.w3.org/2001/XMLSchema#float> ;
                                                             :longitude          "%(LONGITUDE_HOLDER)s"^^<http://www.w3.org/2001/XMLSchema#float> ;
                                                             :nearTo             <http://www.geonames.org/%(NEAR_TO_HOLDER)s/about.rdf> ;
-                                                            :timestamp          "%(TIMESTAMP_HOLDER)s"^^<http://www.w3.org/2001/XMLSchema#string> .
+                                                            :timestamp          %(TIMESTAMP_HOLDER)s .
     }
     
     '''
@@ -91,12 +91,12 @@ def updateData(data):
     PREFIX : <http://www.morelab.deusto.es/agronautasSimple.owl#>
 
     INSERT DATA INTO <http://agronautas>
-    { <%(COOKER_ID_HOLDER)s/%(TIMESTAMP_HOLDER)s/measure>   a :Measure
+    { <%(COOKER_ID_HOLDER)s/%(TIMESTAMP_HOLDER)s/measure>   a :Measure ;
                                                             :externalTemperature   "%(TEMP_EXTERNAL_HOLDER)s"^^<http://www.w3.org/2001/XMLSchema#float> ;
                                                             :internalTemperature   "%(TEMP_INTERNAL_HOLDER)s"^^<http://www.w3.org/2001/XMLSchema#float> ;
                                                             :luminosity            "%(LUMINOSITY_HOLDER)s"^^<http://www.w3.org/2001/XMLSchema#float> ;
-                                                            :timestamp             "%(TIMESTAMP_HOLDER)s"^^<http://www.w3.org/2001/XMLSchema#string> ;
-                                                            :status                "%(STATUS_HOLDERS)s"^^<http://www.w3.org/2001/XMLSchema#string> .
+                                                            :timestamp             %(TIMESTAMP_HOLDER)s ;
+                                                            :status                "%(STATUS_HOLDER)s"^^<http://www.w3.org/2001/XMLSchema#string> .
       <%(COOKER_ID_HOLDER)s>                                :hasMeasure            <%(COOKER_ID_HOLDER)s/%(TIMESTAMP_HOLDER)s/measure> .
     }
     
@@ -115,6 +115,7 @@ def updateData(data):
     
     params = urllib.urlencode({'query': rdfStrCooker})
     opener = urllib.urlopen('http://helheim.deusto.es:8890/sparql?%s', params)
+    print opener.read()
     
     return rdfStrCooker
 
