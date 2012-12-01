@@ -12,7 +12,7 @@ from xml.dom import minidom
 
 verbose = True
 
-HOST = "localhost"
+HOST = "192.168.1.73"
 PORT = 9999
 
 """
