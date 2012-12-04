@@ -6,13 +6,18 @@
 	margin: 0;
 	font-family: Verdana;
 }
+
+.olControlAttribution{
+	visibility: hidden;
+}
+
 #boxes{
 	position: absolute;
 	top:0px;
 	right: 0px;
 	height: 100%;
 	z-index: 10000; 
-	background-color: rgba(0,0,0,0.9);
+	background-color: rgba(0,0,0,0.7);
 }
 
 #main_box, #info_box{
@@ -96,13 +101,13 @@ td.info_box{
 	width: 100px;
 	height: 100px;
 	color: #ffffff;
-	font-size: 24px;
+	font-size: 48px;
 	background-color: #ff3300;
 }
 
-td.info_box small{
-	display:inline-block;
-	font-size: 12px;
+td.info_box span{
+	display:block;
+	font-size: 9px;
 }
 
 #activity dl{

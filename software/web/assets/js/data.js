@@ -17,61 +17,14 @@ function getCookers(){
 function getLocationInfo(parent_data){
   $.ajax(
       {
-        url:'http://maps.googleapis.com/maps/api/geocode/json?latlng=39.76144296429947,-104.8011589050293&sensor=false&callback=?', 
+        url:'http://api.geonames.org/findNearbyPlaceNameJSON?lat='+parent_data.lat.value+'&lng='+parent_data.long.value+'&username=rhokbilbao', 
         dataType:'jsonp', 
         success:function(data) {
-            console.log("------");
-            console.log(parent_data);
-            var prev = $('#'+parent_data.id.value).html();
-            $('#'+parent_data.id.value).html(prev + "<table>\
-                      <tbody>\
-                          <tr>\
-                              <td class=\"field\">ID</td>\
-                              <td>"+parent_data.id.value+"</td>\
-                          </tr>\
-                          <tr>\
-                              <td class=\"field\">Model</td>\
-                              <td>Normal</td>\
-                          </tr>\
-                          <tr>\
-                              <td class=\"field\">City</td>\
-                              <td>Unknown</td>\
-                          </tr>\
-                          <tr>\
-                              <td class=\"field\">Location</td>\
-                              <td>"+parent_data.lat.value+","+parent_data.long.value+"</td>\
-                          </tr>\
-                      </tbody>\
-                  </table>");
-            refresfCookerExpandables();
-            main_list_todo = false;
+            console.log(data);
+            drawCookerInfoResume(parent_data.id.value, parent_data.lat.value, parent_data.long.value,data.geonames[0].name);
         },
         error:function(data) {
-            console.log("------");
-            console.log(parent_data);
-            var prev = $('#'+parent_data.id.value).html();
-            $('#'+parent_data.id.value).html(prev + "<table>\
-                      <tbody>\
-                          <tr>\
-                              <td class=\"field\">ID</td>\
-                              <td>"+parent_data.id.value+"</td>\
-                          </tr>\
-                          <tr>\
-                              <td class=\"field\">Model</td>\
-                              <td>Normal</td>\
-                          </tr>\
-                          <tr>\
-                              <td class=\"field\">City</td>\
-                              <td>Unknown</td>\
-                          </tr>\
-                          <tr>\
-                              <td class=\"field\">Location</td>\
-                              <td>"+parent_data.lat.value+","+parent_data.long.value+"</td>\
-                          </tr>\
-                      </tbody>\
-                  </table>");
-            refresfCookerExpandables();
-            main_list_todo = false;
+            drawCookerInfoResume(parent_data.id.value, parent_data.lat.value, parent_data.long.value,'unknown');
         }
       }
   );
