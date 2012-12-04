@@ -1,1 +1,3 @@
-Non-Arduino software of the project
+Non-Arduino software of the project.
+	- lod contains the python server that receives the notificatios from the solar cookers. The servers converts this info to rdf and stores it in a Virtuoso server
+	- web contains the web-interface for visualizing all the data

@@ -6,7 +6,7 @@
 // declare variables
 SdFat sd;
 SdFile myFile;
-const int chipSelect = 10;
+const int chipSelect = 53;
 float tempInC;
 float humedC;
 float luminC;
@@ -14,7 +14,7 @@ float tempOutC;
 char* luminL;
 boolean advicedHighTemp = false;
 // initialize the library with the numbers of the interface pins
-LiquidCrystal lcd(9, 8, 5, 4, 3, 2);
+LiquidCrystal lcd(12,11, 5, 4, 3, 2); //9,8
 //Botones
 const int bDataPin = 0;
 const int bStartPin = 6;
@@ -22,6 +22,7 @@ const int bFinishPin = 1;
 int bDataState = 1;
 int bStartState = 1;
 int bFinishState = 1;
+int showState = 0;
 long int timestampBegin = 0;
 long int timestampIntermediate = 0;
 long int timestampFinish = 0;
@@ -225,6 +226,7 @@ void readButtons()
   bStartState = digitalRead(bStartPin);
   bFinishState = digitalRead(bFinishPin);  
   bDataState = digitalRead(bDataPin);
+
 }
 
 void evaluateTemperature()
@@ -247,11 +249,12 @@ void checkShowData()
 {
    // check if the pushbutton is pressed.
   // if it is, the buttonState is HIGH:
-  if (bDataState == LOW) {
+  if ((bDataState == LOW) || (showState > 0)) {   
     delay(300);    
+    showState = 1;
     showData(tempInC, tempOutC, humedC, luminC);
-    delay(5000);
-    lcd.clear();
+    delay(2000);
+
   } 
 }
 
@@ -325,6 +328,7 @@ void loop()
   checkStageTwo(); 
   checkShowData();
   evaluateTemperature();
+  lcd.clear();
   
 }
 

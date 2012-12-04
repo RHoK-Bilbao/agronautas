@@ -54,3 +54,52 @@ function refresfCookerExpandables(){
 	}
 }
 
+function drawCookerInfoResume(id, latitude, longitude, city){
+  var prev = $('#'+id).html();
+  $('#'+id).html(prev + "<table>\
+                      <tbody>\
+                          <tr>\
+                              <td class=\"field\">ID</td>\
+                              <td>"+id+"</td>\
+                          </tr>\
+                          <tr>\
+                              <td class=\"field\">Model</td>\
+                              <td>Normal</td>\
+                          </tr>\
+                          <tr>\
+                              <td class=\"field\">City</td>\
+                              <td>"+city+"</td>\
+                          </tr>\
+                          <tr>\
+                              <td class=\"field\">Location</td>\
+                              <td>"+latitude+","+longitude+"</td>\
+                          </tr>\
+                      </tbody>\
+                  </table>\
+                  <table cellspacing=\"5\">\
+                      <tbody>\
+                          <tr>\
+                              <td class=\"info_box\">\
+                                  9\
+                                  <span>meals</span>\
+                              </td>\
+                              <td class=\"info_box\">\
+                                  9\
+                                  <span>W generated</span>\
+                              </td>\
+                              <td class=\"info_box\">\
+                                  9\
+                                  <span>W potentially saved</span>\
+                              </td>\
+                              <td class=\"info_box\">\
+                                  9\
+                                  <span>hours</span>\
+                              </td>\
+                          </tr>\
+                      </tbody>\
+                  </table>");
+    refresfCookerExpandables();
+    main_list_todo = false;
+
+}
+

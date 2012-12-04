@@ -1,2 +1,15 @@
 SELECT ?id WHERE { ?id a <http://www.morelab.deusto.es/agronautasSimple.owl#SolarCooker> .}
 
+select ?id (?end - ?start) as ?runningtime ?persons WHERE { ?id a <http://www.morelab.deusto.es/agronautasSimple.owl#SolarCooker> .
+?id <http://www.morelab.deusto.es/agronautasSimple.owl#cookedMenus> ?menu .
+?menu <http://www.morelab.deusto.es/agronautasSimple.owl#timestamp> ?start .
+?menu <http://www.morelab.deusto.es/agronautasSimple.owl#persons> ?persons .
+?id <http://www.morelab.deusto.es/agronautasSimple.owl#hasMeasure> ?measure .
+?measure <http://www.morelab.deusto.es/agronautasSimple.owl#timestamp> ?end .
+?measure <http://www.morelab.deusto.es/agronautasSimple.owl#status> ?status .
+
+FILTER regex(?status, "stop")
+
+
+}
+
