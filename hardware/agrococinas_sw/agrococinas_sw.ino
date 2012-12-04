@@ -14,8 +14,8 @@ float tempOutC;
 char* luminL;
 boolean advicedHighTemp = false;
 // initialize the library with the numbers of the interface pins
-LiquidCrystal lcd(12,11, 5, 4, 3, 2); //9,8
-//Botones
+LiquidCrystal lcd(12,11, 5, 4, 3, 2);
+//buttons
 const int bDataPin = 0;
 const int bStartPin = 6;
 const int bFinishPin = 1;
@@ -23,11 +23,12 @@ int bDataState = 1;
 int bStartState = 1;
 int bFinishState = 1;
 int showState = 0;
+//timestamp
 long int timestampBegin = 0;
 long int timestampIntermediate = 0;
 long int timestampFinish = 0;
-int stage = 0; //0:sin orientar; 1:orientado y calentandose; 2:cocinando; 
-//Sensors
+int stage = 0; //0:not oriented; 1:oriented and heating; 2:cooking; 
+//sensors
 int tempInPin = A0;
 int humedPin = A1;
 int luminPin = A2;
@@ -39,19 +40,19 @@ int addr = 0;
 int addr1 = 0;
 int addr2 = 0;
 int addr3 = 0;
-// Constants
+// constants and aux
 float supplyVolt = 5.0;
 int temp_warning = 22;
 char* msg = "";
-char* nombre_cocina = "SuperCocina";
-char StringFinal[40];
+char* kitchen_name = "kitchen_1";
+char aux_string[40];
 
 
 void setup()
 {
   Serial.begin(115200); //opens serial port, sets data rate to 115200 bps
-   pinMode(led, OUTPUT);   
-  // write a 0 to all 512 bytes of the EEPROM
+  pinMode(led, OUTPUT);//led pin as output   
+  //clean the EEPROM
   for (int i = 0; i < 512; i++)
     EEPROM.write(i, 0);
   pinMode(bStartPin, INPUT); 
@@ -61,30 +62,30 @@ void setup()
   lcd.begin(20, 4);
   // Print a message to the LCD.
   lcd.setCursor(0, 0);
-  lcd.print("Orientame al sol y");
+  lcd.print("direct me towards the sun and");
   lcd.setCursor(0, 2);
-  lcd.print("despues pulsa verde.");   
+  lcd.print("press green button");   
 }
 
 void writeSD(){
 if (!sd.begin(chipSelect, SPI_HALF_SPEED)) sd.initErrorHalt();
   // open the file for write at end like the Native SD library
   if (!myFile.open("log.txt", O_RDWR | O_CREAT | O_AT_END)) {
-    sd.errorHalt("opening test.txt for write failed");
+    sd.errorHalt("write failed");
   }
   myFile.println();
-  myFile.print("Temperatura Externa: ");
+  myFile.print("Outside temperature: ");
   myFile.print(tempOutC,0); 
   myFile.println();
-  myFile.print("Luminosidad: ");
+  myFile.print("Luminosity: ");
   myFile.print(luminC, 0); 
   myFile.print("  ");
   myFile.print(luminL);
   myFile.println();
-  myFile.print("Humedad: ");
+  myFile.print("Humidity: ");
   myFile.print(humedC,0);
   myFile.println();
-  myFile.print("Temperatura Interna: ");
+  myFile.print("Inside temperatura: ");
   myFile.print(tempInC,0);  
   myFile.println();
   // close the file:
@@ -96,7 +97,7 @@ void readSD(){
   if (!sd.begin(chipSelect, SPI_HALF_SPEED)) sd.initErrorHalt();
   // re-open the file for reading:
   if (!myFile.open("log.txt", O_READ)) {
-    sd.errorHalt("opening test.txt for read failed");
+    sd.errorHalt("read failed");
   }
   Serial.println("log.txt:");
   // read from the file until there's nothing else in it:
@@ -111,7 +112,7 @@ void evaluate_temp()
   Serial.println(tempOutC);
   Serial.println(temp_warning);
   if(tempOutC> temp_warning){
-    Serial.print("Temperatura superior a ");
+    Serial.print("Temperature over ");
     Serial.println(temp_warning);
     digitalWrite(led, HIGH); 
   }else{
@@ -122,37 +123,38 @@ void evaluate_temp()
 void evaluate_lumi()
 {
   if(luminC < 75){
-    luminL = "Muy baja";
+    luminL = "very dark";
   }else if(luminC < 150){
-    luminL = "baja";
+    luminL = "dark";
   }else if(luminC < 225){
-    luminL = "luminoso";
+    luminL = "bright";
   }else{
-    luminL = "muy luminoso";
+    luminL = "very bright";
   } 
 }
 
 void generateUpdate()
 {
-  char arroba[2]="@";
+  //aux variables
+  char at[2]="@";
   char aux[10];
-  memcpy(StringFinal,"UPDATE@",7); 
-  strcat(StringFinal, nombre_cocina);
-  strcat(StringFinal, arroba);
+  //build the string for sending via WiFi
+  memcpy(aux_string,"UPDATE@",7); 
+  strcat(aux_string, kitchen_name);
+  strcat(aux_string, at);
   sprintf(aux,"%d",int(luminC));
-  strcat(StringFinal, aux);
-  strcat(StringFinal, arroba);
+  strcat(aux_string, aux);
+  strcat(aux_string, at);
   sprintf(aux,"%d",int(tempOutC));
-  strcat(StringFinal, aux);
-  strcat(StringFinal, arroba);
+  strcat(aux_string, aux);
+  strcat(aux_string, at);
   sprintf(aux,"%d",int(tempInC));
-  strcat(StringFinal, aux);
-  strcat(StringFinal, arroba);
+  strcat(aux_string, aux);
+  strcat(aux_string, at);
   sprintf(aux,"%d",int(humedC));
-  strcat(StringFinal, aux);
+  strcat(aux_string, aux);
   delay(10);
-  Serial.println(StringFinal);
-  //return StringFinal;
+  Serial.println(aux_string);
 }
 
 void showData(float iT, float eT, float h, float l){
@@ -170,57 +172,58 @@ void showData(float iT, float eT, float h, float l){
   lcd.setCursor(19, 1);
   lcd.print("C");
   lcd.setCursor(0, 2);
-  lcd.print("Humedad:");
+  lcd.print("Humidity:");
   lcd.setCursor(13, 2);
   lcd.print(h,1);
   lcd.setCursor(19, 2);
   lcd.print(char(37));
   lcd.setCursor(0, 3);
-  lcd.print("Luminosidad:");
+  lcd.print("Luminosity:");
   lcd.setCursor(13, 3);
   lcd.print(l,0);
   lcd.setCursor(18, 3);
   lcd.print("LX");
 }
 
+//read all the sensors
 void readSensors()
 {
-  ////////////////////Leemos los sensores////////////////////////////////////////
   tempInC = analogRead(tempInPin);           //read the value from the sensor
   tempInC = (supplyVolt * tempInC * 100.0)/1023.0;  //temp in
   tempInC = (tempInC-32)*5/9;
   delay(20);
   tempOutC = analogRead(tempOutPin);           //read the value from the sensor
-  tempOutC = (supplyVolt * tempOutC * 100.0)/1023.0;  //convert the analog data to temperature
+  tempOutC = (supplyVolt * tempOutC * 100.0)/1023.0;  //change it the analog data to temperature
   evaluate_temp();
   delay(20);
   humedC = analogRead(humedPin);           //read the value from the sensor
-  float voltage = humedC/1023. * supplyVolt; // convert to voltage value
+  float voltage = humedC/1023. * supplyVolt; // change it to voltage value
   float sensorRH = 161.0 * voltage / supplyVolt - 25.8;
-  //humedC = ((((humedC/1023)*5)-0.8)/3.1)*100;  //convert the analog data to HR%
+  //humedC = ((((humedC/1023)*5)-0.8)/3.1)*100;  //change it the analog data to HR%
   humedC = (sensorRH)/(1.0546-0.00216*(tempOutC)); // temperature compensation
   delay(20);
 
   luminC = analogRead(luminPin);           //read the value from the sensor
   evaluate_lumi();
-  //luminC = (5.0 * luminC * 100.0)/1024.0;  //convert the analog data 
+  //luminC = (5.0 * luminC * 100.0)/1024.0;  //change it the analog data 
   Serial.println("=====================");
-  Serial.print("Temperatura Externa: ");
+  Serial.print("Outside temperature: ");
   Serial.print(tempOutC,0); 
   Serial.println();
-  Serial.print("Luminosidad: ");
+  Serial.print("Luminosity: ");
   Serial.print(luminC, 0); 
   Serial.print("  ");
   Serial.print(luminL);
   Serial.println();
-  Serial.print("Humedad: ");
+  Serial.print("Humidity: ");
   Serial.print(humedC,0);
   Serial.println();
-  Serial.print("Temperatura Interna: ");
+  Serial.print("Inside temperature: ");
   Serial.print(tempInC,0);  
   Serial.println();
 }
 
+//check the state of the buttons
 void readButtons()
 {
   bStartState = digitalRead(bStartPin);
@@ -229,18 +232,19 @@ void readButtons()
 
 }
 
+//check if the temperature is good enough to cook
 void evaluateTemperature()
 {
   if ((tempInC>60) && (!advicedHighTemp)){
   lcd.clear();
   lcd.setCursor(0,0);
-  lcd.print("Estoy a 60 grados.");
+  lcd.print("I'm above 60C");
   lcd.setCursor(0,1);
-  lcd.print("Cuando introduzcas");
+  lcd.print("when the food is inside");
   lcd.setCursor(0,2);
-  lcd.print("la comida, pulsa el");
+  lcd.print("press the");
   lcd.setCursor(0,3);
-  lcd.print("verde.");
+  lcd.print("green button");
   advicedHighTemp=true;
   }
 }
@@ -258,32 +262,32 @@ void checkShowData()
   } 
 }
 
+//check if the food is cooked
 void checkStageTwo()
 {
     if ((bFinishState == LOW)&&(stage == 2)){
     delay(300);
     lcd.clear();
     lcd.setCursor(0,0);
-    lcd.print("Comida lista");
-    lcd.setCursor(0,2);
-    lcd.print("Que aproveche");
-    delay(3000);
+    lcd.print("Food ready!");
+    delay(2000);
     lcd.clear();
     stage = 0;
   }  
 }
 
+//check if the kitchen is heating and ready to cook
 void checkStageOne()
 {
     if (bStartState == LOW){
-    Serial.println("pulsado verde");
+    Serial.println("green button pressed");
     if (stage == 0){
       delay(300);
       lcd.clear();
       lcd.setCursor(0,0);
-      lcd.print("La cocina se esta");
+      lcd.print("Kitchen is");
       lcd.setCursor(0,2);
-      lcd.print("calentando");
+      lcd.print("heating");
       delay(3000);
       lcd.clear();
       stage = 1;
@@ -292,20 +296,22 @@ void checkStageOne()
       delay(300);
       lcd.clear();
       lcd.setCursor(0,0);
-      lcd.print("Cocinando");
+      lcd.print("Cooking");
       delay(3000);
       lcd.clear();
       stage = 2;
     }
   }
 }
+
+//main
 void loop()
 {
   readSensors();
   delay(3000);
   generateUpdate();
   writeSD();
-  memset(StringFinal,0,sizeof(StringFinal));
+  memset(aux_string,0,sizeof(aux_string));
   addr1 = addr + 1;
   addr2 = addr + 2;
   addr3 = addr + 3;
